@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="in.ac.iitb.cse.kartiks.a150050025_26.HomeActivity">
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="116dp"
+        android:layout_height="36dp"
+        android:text="Welcome"
+        android:fadingEdge="vertical"
+        android:fadingEdgeLength="10dp" />
+
+    <ListView
+        android:id="@android:id/list"
+        android:fadingEdge="vertical"
+        android:fadingEdgeLength="10dp"
+        android:longClickable="true"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+    </ListView>
+</LinearLayout>
