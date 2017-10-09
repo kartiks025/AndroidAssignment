@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     tools:context="in.ac.iitb.cse.kartiks.a150050025_26.HomeActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
 
     <TextView
         android:id="@+id/textView"
@@ -15,12 +18,13 @@
         android:fadingEdge="vertical"
         android:fadingEdgeLength="10dp" />
 
-    <ListView
-        android:id="@android:id/list"
-        android:fadingEdge="vertical"
-        android:fadingEdgeLength="10dp"
-        android:longClickable="true"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
-    </ListView>
-</LinearLayout>
+        android:layout_height="wrap_content"
+        android:id="@+id/postlayout"
+        android:orientation="vertical"
+        >
+    </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

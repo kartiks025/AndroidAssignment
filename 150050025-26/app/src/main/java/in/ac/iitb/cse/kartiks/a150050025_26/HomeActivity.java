@@ -11,12 +11,16 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import org.json.JSONArray;
@@ -31,50 +35,26 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
+import static in.ac.iitb.cse.kartiks.a150050025_26.R.id.contentPanel;
+import static in.ac.iitb.cse.kartiks.a150050025_26.R.id.parent;
+
 public class HomeActivity extends BaseActivity {
 
-    private ShowPostTask followTask = null;
+    private JSONArray allPosts;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-//        Bundle bundle = getIntent().getExtras();
-//        String id = bundle.getString("id");
-//        TextView t = (TextView) findViewById(R.id.textView);
-//        t.append(id);
-
-
-
-        ListView list = (ListView) findViewById(android.R.id.list);
-
-        PostAdapter adapter = new PostAdapter(this);
-        list.setAdapter(adapter);
-
-
-        showPost(adapter);
-
-    }
-
-
-    private JSONObject showPost(PostAdapter adapter){
-        if (followTask != null) {
-            return null;
-        }
-        followTask = new ShowPostTask(adapter);
+        ShowPostTask followTask = new ShowPostTask();
         followTask.execute((Void) null);
-        return null;
     }
-
-
 
 
     public class ShowPostTask extends AsyncTask<Void, Void, JSONArray> {
 
-        private final PostAdapter adapter;
 
-        ShowPostTask(PostAdapter adapter1) {
-            adapter = adapter1;
+        ShowPostTask() {
         }
 
         @Override
@@ -125,9 +105,127 @@ public class HomeActivity extends BaseActivity {
 
         @Override
         protected void onPostExecute(final JSONArray success) {
-            followTask = null;
             Log.d("json", success.toString());
-            adapter.upDateEntries(success);
+            allPosts=success;
+            for(int i=0;i<allPosts.length();i++){
+                LinearLayout home = (LinearLayout)findViewById(R.id.postlayout);
+                View post = getLayoutInflater().inflate(R.layout.list_html, null);
+
+                TextView userIdView = (TextView) post.findViewById(R.id.postuserid);
+                TextView timeView = (TextView) post.findViewById(R.id.posttime);
+                TextView posttextView = (TextView) post.findViewById(R.id.posttext);
+
+                try {
+                    String userId = allPosts.getJSONObject(i).getString("uid");
+                    userIdView.setText(userId);
+                    String time = allPosts.getJSONObject(i).getString("timestamp");
+                    timeView.setText(time);
+                    String posttext = allPosts.getJSONObject(i).getString("text");
+                    posttextView.setText(posttext);
+
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                Button addCommentButton = (Button) post.findViewById(R.id.addcommentbutton);
+                try {
+                    addCommentButton.setTag(allPosts.getJSONObject(i).getString("postid"));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                addCommentButton.setOnClickListener(new View.OnClickListener() {
+
+
+                    @Override
+                    public void onClick(View view) {
+                        Intent intent = new Intent(getApplicationContext(), addComment.class);
+                        intent.putExtra("id",view.getTag().toString());
+                        startActivity(intent);
+                    }
+                });
+
+                JSONArray comments = new JSONArray();
+
+                try {
+                    comments = allPosts.getJSONObject(i).getJSONArray("Comment");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                for(int j=0;j<comments.length() && j< 3 ;j++){
+                    LinearLayout commentLayout = (LinearLayout) post.findViewById(R.id.commentlayout);
+                    View comment = getLayoutInflater().inflate(R.layout.comment, null);
+
+                    TextView cuserIdView = (TextView) comment.findViewById(R.id.commentuserid);
+                    TextView ctimeView = (TextView) comment.findViewById(R.id.commenttime);
+                    TextView cposttextView = (TextView) comment.findViewById(R.id.commenttext);
+
+                    try {
+                        String userId = comments.getJSONObject(j).getString("uid");
+                        cuserIdView.setText(userId);
+                        String time = comments.getJSONObject(j).getString("timestamp");
+                        ctimeView.setText(time);
+                        String posttext = comments.getJSONObject(j).getString("text");
+                        cposttextView.setText(posttext);
+
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    commentLayout.addView(comment);
+                }
+                if(comments.length()<=3){
+
+                }
+                else{
+
+                    final TextView moreLink = (TextView) post.findViewById(R.id.morelink);
+                    moreLink.setVisibility(View.VISIBLE);
+                    moreLink.setTag(i);
+
+                    moreLink.setOnClickListener(new View.OnClickListener() {
+
+                        @Override
+                        public void onClick(View view) {
+                            View post = (View) view.getParent();
+                            int postposition = Integer.parseInt(view.getTag().toString());
+                            JSONArray comments = new JSONArray();
+
+                            try {
+                                comments = allPosts.getJSONObject(postposition).getJSONArray("Comment");
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+
+                            for(int j=3;j<comments.length() ;j++){
+                                LinearLayout commentLayout = (LinearLayout) post.findViewById(R.id.commentlayout);
+                                View comment = getLayoutInflater().inflate(R.layout.comment, null);
+
+                                TextView cuserIdView = (TextView) comment.findViewById(R.id.commentuserid);
+                                TextView ctimeView = (TextView) comment.findViewById(R.id.commenttime);
+                                TextView cposttextView = (TextView) comment.findViewById(R.id.commenttext);
+
+                                try {
+                                    String userId = comments.getJSONObject(j).getString("uid");
+                                    cuserIdView.setText(userId);
+                                    String time = comments.getJSONObject(j).getString("timestamp");
+                                    ctimeView.setText(time);
+                                    String posttext = comments.getJSONObject(j).getString("text");
+                                    cposttextView.setText(posttext);
+
+
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                                commentLayout.addView(comment);
+                            }
+                            moreLink.setVisibility(View.GONE);
+                        }
+                    });
+                }
+                home.addView(post);
+            }
         }
     }
 
