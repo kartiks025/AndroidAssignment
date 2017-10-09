@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="in.ac.iitb.cse.kartiks.a150050025_26.SearchActivity"
+    android:orientation="vertical"
+    android:layout_centerInParent="true" >
+
+
+    <SearchView
+        android:id="@+id/simpleSearchView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clickable="true" />
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/inflayout"
+        android:orientation="vertical">
+        <ListView
+            android:id="@+id/userlist"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:clickable="true"/>
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/selectid"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView"
+        android:visibility="invisible"/>
+
+    <TextView
+        android:id="@+id/selectname"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView"
+        android:visibility="invisible"/>
+
+    <TextView
+        android:id="@+id/selectemail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView"
+        android:visibility="invisible"/>
+
+    <Button
+        android:id="@+id/follow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Follow"
+        android:visibility="invisible"/>
+
+    <Button
+        android:id="@+id/showpost"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Show Posts"
+        android:visibility="invisible"/>
+
+    <Button
+        android:id="@+id/cancel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Cancel"
+        android:visibility="invisible"/>
+
+
+</LinearLayout>
+    </RelativeLayout>

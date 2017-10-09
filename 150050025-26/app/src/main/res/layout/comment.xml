@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" >
+
+    <TextView
+        android:id="@+id/commentuserid"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="10dp"
+        android:text="A List item id"
+        android:textStyle="bold"
+        android:textSize="12sp"/>
+
+    <TextView
+        android:id="@+id/commenttime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/commentuserid"
+        android:layout_marginTop="13dp"
+        android:text="A List item title"
+        android:textSize="8sp"
+        />
+
+    <TextView
+        android:id="@+id/commenttext"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/commentuserid"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="2dp"
+        android:text="The List item description"
+        android:layout_alignParentLeft="true"
+        android:textSize="10sp" />
+
+</RelativeLayout>
