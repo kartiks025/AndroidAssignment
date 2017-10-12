@@ -4,12 +4,15 @@ import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -17,6 +20,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -50,6 +54,12 @@ public class HomeActivity extends BaseActivity {
         followTask.execute((Void) null);
     }
 
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        ShowPostTask followTask = new ShowPostTask();
+        followTask.execute((Void) null);
+    }
 
     public class ShowPostTask extends AsyncTask<Void, Void, JSONArray> {
 
@@ -107,13 +117,15 @@ public class HomeActivity extends BaseActivity {
         protected void onPostExecute(final JSONArray success) {
             Log.d("json", success.toString());
             allPosts=success;
+            LinearLayout home = (LinearLayout)findViewById(R.id.postlayout);
+            home.removeAllViews();
             for(int i=0;i<allPosts.length();i++){
-                LinearLayout home = (LinearLayout)findViewById(R.id.postlayout);
                 View post = getLayoutInflater().inflate(R.layout.list_html, null);
 
                 TextView userIdView = (TextView) post.findViewById(R.id.postuserid);
                 TextView timeView = (TextView) post.findViewById(R.id.posttime);
                 TextView posttextView = (TextView) post.findViewById(R.id.posttext);
+                ImageView imageView = (ImageView) post.findViewById(R.id.postimage);
 
                 try {
                     String userId = allPosts.getJSONObject(i).getString("uid");
@@ -122,6 +134,18 @@ public class HomeActivity extends BaseActivity {
                     timeView.setText(time);
                     String posttext = allPosts.getJSONObject(i).getString("text");
                     posttextView.setText(posttext);
+                    String imagedata = allPosts.getJSONObject(i).getString("encode");
+                    byte data[] = Base64.decode(imagedata, Base64.DEFAULT);
+                    Log.d("image",data.toString());
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+                    if("".equals(imagedata)){
+                        imageView.setVisibility(View.GONE);
+                        Log.d("imagenull",data.toString());
+                    }
+                    else{
+                        imageView.setImageBitmap(bitmap);
+                        Log.d("imagenotnull",data.toString());
+                    }
 
 
                 } catch (JSONException e) {

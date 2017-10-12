@@ -71,7 +71,7 @@ public class SearchActivity extends BaseActivity {
             public boolean onQueryTextChange(String newText) {
                     ShowUsersTask usersTask = new ShowUsersTask(newText, adapter);
                     usersTask.execute((Void) null);
-//                    listx.bringToFront();
+                    findViewById(id.inflayout).bringToFront();
                 return false;
             }
         });

@@ -12,7 +12,7 @@
         android:layout_height="91dp"
         android:ems="10"
         android:inputType="textPersonName"
-        android:text="Comment Text"
+        android:hint="Comment Text"
         tools:layout_editor_absoluteX="16dp"
         tools:layout_editor_absoluteY="16dp" />
 

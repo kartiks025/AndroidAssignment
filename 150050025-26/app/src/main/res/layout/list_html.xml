@@ -40,6 +40,11 @@
         android:text="@string/default_field"
         android:textSize="14sp" />
 
+    <ImageView
+        android:id="@+id/postimage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
     <Button
         android:id="@+id/addcommentbutton"
         android:layout_width="wrap_content"

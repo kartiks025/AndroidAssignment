@@ -21,7 +21,7 @@ import java.nio.charset.StandardCharsets;
  */
 
 public class Helper {
-    public static String url = "http://192.168.0.109:8080/Android/";
+    public static String url = "http://10.42.0.172:8080/Android/";
 
     public static String IstreamToString(InputStream is) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(is,"utf-8"));

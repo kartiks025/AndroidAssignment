@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="in.ac.iitb.cse.kartiks.a150050025_26.addPost">
+    tools:context="in.ac.iitb.cse.kartiks.a150050025_26.addPost"
+    android:orientation="vertical">
 
     <EditText
         android:id="@+id/postText"
@@ -12,9 +13,15 @@
         android:layout_height="91dp"
         android:ems="10"
         android:inputType="textPersonName"
-        android:text="Post Text"
+        android:hint="Post Text"
         tools:layout_editor_absoluteX="16dp"
         tools:layout_editor_absoluteY="16dp" />
+
+    <Button
+        android:id="@+id/upload"
+        android:layout_width="95dp"
+        android:layout_height="wrap_content"
+        android:text="Upload Image" />
 
     <Button
         android:id="@+id/postbutton"
@@ -23,6 +30,12 @@
         android:text="Post"
         tools:layout_editor_absoluteX="16dp"
         tools:layout_editor_absoluteY="131dp" />
+
+    <ImageView
+        android:id="@+id/preview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+         />
 
 
 </LinearLayout>
