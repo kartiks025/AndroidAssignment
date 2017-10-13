@@ -63,9 +63,11 @@
         android:id="@+id/morelink"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="...more"
+        android:text="@string/more"
         android:textSize="14sp"
         android:clickable="true"
+        android:textColor="#0000EE"
+        android:textStyle=""
         android:layout_marginTop="10dp"
         android:visibility="gone"/>
 

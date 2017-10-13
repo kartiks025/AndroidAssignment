@@ -17,4 +17,5 @@
     </string>
     <string name="title_activity_home">HomeActivity</string>
     <string name="default_field">This is a list item</string>
+    <string name="more"><u>...more</u></string>
 </resources>
