@@ -192,6 +192,8 @@ public class SearchActivity extends BaseActivity {
                     JSONArray data = jsonObj.getJSONArray("data");
                     return data;
                 }
+                wr.flush();
+                wr.close();
             }
             catch (IOException e) {
                 System.out.println(result);
@@ -259,6 +261,8 @@ public class SearchActivity extends BaseActivity {
                     Log.d("status","true");
                     return true;
                 }
+                wr.flush();
+                wr.close();
             }
             catch (IOException e) {
                 System.out.println(result);
@@ -327,6 +331,8 @@ public class SearchActivity extends BaseActivity {
                     Log.d("status","true");
                     return true;
                 }
+                wr.flush();
+                wr.close();
             }
             catch (IOException e) {
                 System.out.println(result);
@@ -386,6 +392,7 @@ public class SearchActivity extends BaseActivity {
                     JSONArray data = jsonObj.getJSONArray("data");
                     return data;
                 }
+
             }
             catch (IOException e) {
                 System.out.println(result);

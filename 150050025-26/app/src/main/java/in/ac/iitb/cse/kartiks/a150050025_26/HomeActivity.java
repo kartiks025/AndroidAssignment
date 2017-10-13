@@ -38,6 +38,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.ExecutionException;
 
 import static in.ac.iitb.cse.kartiks.a150050025_26.R.id.contentPanel;
 import static in.ac.iitb.cse.kartiks.a150050025_26.R.id.parent;
@@ -45,13 +46,50 @@ import static in.ac.iitb.cse.kartiks.a150050025_26.R.id.parent;
 public class HomeActivity extends BaseActivity {
 
     private JSONArray allPosts;
+    private int offset = -1;
+    private int limit = 20;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        offset = -1;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
         ShowPostTask followTask = new ShowPostTask();
         followTask.execute((Void) null);
+        Button previous = (Button) findViewById(R.id.previousbutton);
+        previous.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(offset>0)
+                    offset-=limit;
+                ShowPostTask followTask = new ShowPostTask();
+                try {
+                    followTask.execute((Void) null).get();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                }
+                ((ScrollView) findViewById(R.id.scrollview)).fullScroll(View.FOCUS_UP);
+
+            }
+        });
+        Button next = (Button) findViewById(R.id.nextbutton);
+        next.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                offset+=limit;
+                ShowPostTask followTask = new ShowPostTask();
+                try {
+                    followTask.execute((Void) null).get();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                }
+                ((ScrollView) findViewById(R.id.scrollview)).fullScroll(View.FOCUS_UP);
+            }
+        });
     }
 
     @Override
@@ -61,14 +99,14 @@ public class HomeActivity extends BaseActivity {
         followTask.execute((Void) null);
     }
 
-    public class ShowPostTask extends AsyncTask<Void, Void, JSONArray> {
+    public class ShowPostTask extends AsyncTask<Void, Void, JSONObject> {
 
 
         ShowPostTask() {
         }
 
         @Override
-        protected JSONArray doInBackground(Void... params) {
+        protected JSONObject doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
             String http = Helper.url + "SeePosts";
             String result = "";
@@ -78,17 +116,22 @@ public class HomeActivity extends BaseActivity {
                 URL url = new URL(http);
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setDoInput(true);
+                urlConnection.setDoOutput(true);
                 urlConnection.setReadTimeout(3000);
                 urlConnection.setConnectTimeout(3000);
                 urlConnection.setRequestMethod("POST");
                 urlConnection.setUseCaches(false);
+                urlConnection.setRequestProperty( "Content-Type", "application/x-www-form-urlencoded");
+                urlConnection.setRequestProperty( "charset", "utf-8");
                 urlConnection.setRequestProperty("Accept", "application/json");
 
-                Log.d("id", "whatthefuck");
-//                    Log.d("password", mPassword);
+                String param = "offset="+offset+"&limit="+limit;
+                byte[] postData = param.getBytes( StandardCharsets.UTF_8 );
+                urlConnection.setRequestProperty( "Content-Length", Integer.toString( postData.length));
 
-                int responseCode = urlConnection.getResponseCode();
-//                    Log.d("response",String.valueOf(responseCode));
+                DataOutputStream wr = new DataOutputStream( urlConnection.getOutputStream());
+                wr.write( postData );
+
                 result = Helper.IstreamToString(urlConnection.getInputStream());
                 Log.d("response",result);
                 JSONObject jsonObj = new JSONObject(result);
@@ -96,8 +139,10 @@ public class HomeActivity extends BaseActivity {
                 if(jsonObj.getBoolean("status")) {
                     Log.d("status","true");
                     JSONArray data = jsonObj.getJSONArray("data");
-                    return data;
+                    return jsonObj;
                 }
+                wr.flush();
+                wr.close();
             }
             catch (IOException e) {
                 System.out.println(result);
@@ -114,11 +159,24 @@ public class HomeActivity extends BaseActivity {
         }
 
         @Override
-        protected void onPostExecute(final JSONArray success) {
+        protected void onPostExecute(final JSONObject success) {
             Log.d("json", success.toString());
-            allPosts=success;
+            try {
+                allPosts=success.getJSONArray("data");
+                offset=success.getInt("offset");
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
             LinearLayout home = (LinearLayout)findViewById(R.id.postlayout);
             home.removeAllViews();
+            if(offset>0)
+                findViewById(R.id.previousbutton).setVisibility(View.VISIBLE);
+            else
+                findViewById(R.id.previousbutton).setVisibility(View.GONE);
+            if(allPosts.length()==20)
+                findViewById(R.id.nextbutton).setVisibility(View.VISIBLE);
+            else
+                findViewById(R.id.nextbutton).setVisibility(View.GONE);
             for(int i=0;i<allPosts.length();i++){
                 View post = getLayoutInflater().inflate(R.layout.list_html, null);
 
@@ -135,16 +193,17 @@ public class HomeActivity extends BaseActivity {
                     String posttext = allPosts.getJSONObject(i).getString("text");
                     posttextView.setText(posttext);
                     String imagedata = allPosts.getJSONObject(i).getString("encode");
-                    byte data[] = Base64.decode(imagedata, Base64.DEFAULT);
-                    Log.d("image",data.toString());
-                    Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+
                     if("".equals(imagedata)){
                         imageView.setVisibility(View.GONE);
-                        Log.d("imagenull",data.toString());
                     }
                     else{
+                        byte data[] = Base64.decode(imagedata, Base64.DEFAULT);
+//                    Log.d("image",data.toString());
+                        Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
                         imageView.setImageBitmap(bitmap);
                         Log.d("imagenotnull",data.toString());
+
                     }
 
 

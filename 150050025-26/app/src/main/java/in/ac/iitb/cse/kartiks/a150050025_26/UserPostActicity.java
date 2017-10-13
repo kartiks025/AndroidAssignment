@@ -97,6 +97,8 @@ public class UserPostActicity extends AppCompatActivity {
                     JSONArray data = jsonObj.getJSONArray("data");
                     return data;
                 }
+                wr.flush();
+                wr.close();
             }
             catch (IOException e) {
                 System.out.println(result);

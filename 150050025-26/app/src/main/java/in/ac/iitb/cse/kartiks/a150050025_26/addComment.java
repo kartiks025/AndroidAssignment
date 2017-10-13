@@ -85,6 +85,8 @@ public class addComment extends BaseActivity {
                     Log.d("status","true");
                     return true;
                 }
+                wr.flush();
+                wr.close();
             }
             catch (IOException e) {
                 System.out.println(result);
