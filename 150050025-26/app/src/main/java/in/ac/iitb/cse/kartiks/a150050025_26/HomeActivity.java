@@ -133,16 +133,10 @@ public class HomeActivity extends BaseActivity {
                 wr.write( postData );
 
                 result = Helper.IstreamToString(urlConnection.getInputStream());
-                Log.d("response",result);
                 JSONObject jsonObj = new JSONObject(result);
-                Log.d("response",jsonObj.toString());
-                if(jsonObj.getBoolean("status")) {
-                    Log.d("status","true");
-                    JSONArray data = jsonObj.getJSONArray("data");
-                    return jsonObj;
-                }
                 wr.flush();
                 wr.close();
+                return jsonObj;
             }
             catch (IOException e) {
                 System.out.println(result);
@@ -155,160 +149,164 @@ public class HomeActivity extends BaseActivity {
                 if (urlConnection != null)
                     urlConnection.disconnect();
             }
-            return null;
         }
 
         @Override
         protected void onPostExecute(final JSONObject success) {
-            Log.d("json", success.toString());
+
+
             try {
-                allPosts=success.getJSONArray("data");
-                offset=success.getInt("offset");
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            LinearLayout home = (LinearLayout)findViewById(R.id.postlayout);
-            home.removeAllViews();
-            if(offset>0)
-                findViewById(R.id.previousbutton).setVisibility(View.VISIBLE);
-            else
-                findViewById(R.id.previousbutton).setVisibility(View.GONE);
-            if(allPosts.length()==20)
-                findViewById(R.id.nextbutton).setVisibility(View.VISIBLE);
-            else
-                findViewById(R.id.nextbutton).setVisibility(View.GONE);
-            for(int i=0;i<allPosts.length();i++){
-                View post = getLayoutInflater().inflate(R.layout.list_html, null);
+                if(success.getBoolean("status")){
+                    allPosts=success.getJSONArray("data");
+                    offset=success.getInt("offset");
+                    LinearLayout home = (LinearLayout)findViewById(R.id.postlayout);
+                    home.removeAllViews();
+                    if(offset>0)
+                        findViewById(R.id.previousbutton).setVisibility(View.VISIBLE);
+                    else
+                        findViewById(R.id.previousbutton).setVisibility(View.GONE);
+                    if(allPosts.length()==20)
+                        findViewById(R.id.nextbutton).setVisibility(View.VISIBLE);
+                    else
+                        findViewById(R.id.nextbutton).setVisibility(View.GONE);
+                    for(int i=0;i<allPosts.length();i++){
+                        View post = getLayoutInflater().inflate(R.layout.list_html, null);
 
-                TextView userIdView = (TextView) post.findViewById(R.id.postuserid);
-                TextView timeView = (TextView) post.findViewById(R.id.posttime);
-                TextView posttextView = (TextView) post.findViewById(R.id.posttext);
-                ImageView imageView = (ImageView) post.findViewById(R.id.postimage);
+                        TextView userIdView = (TextView) post.findViewById(R.id.postuserid);
+                        TextView timeView = (TextView) post.findViewById(R.id.posttime);
+                        TextView posttextView = (TextView) post.findViewById(R.id.posttext);
+                        ImageView imageView = (ImageView) post.findViewById(R.id.postimage);
 
-                try {
-                    String userId = allPosts.getJSONObject(i).getString("uid");
-                    userIdView.setText(userId);
-                    String time = allPosts.getJSONObject(i).getString("timestamp");
-                    timeView.setText(time);
-                    String posttext = allPosts.getJSONObject(i).getString("text");
-                    posttextView.setText(posttext);
-                    String imagedata = allPosts.getJSONObject(i).getString("encode");
+                        try {
+                            String userId = allPosts.getJSONObject(i).getString("uid");
+                            userIdView.setText(userId);
+                            String time = allPosts.getJSONObject(i).getString("timestamp");
+                            timeView.setText(time);
+                            String posttext = allPosts.getJSONObject(i).getString("text");
+                            posttextView.setText(posttext);
+                            String imagedata = allPosts.getJSONObject(i).getString("encode");
 
-                    if("".equals(imagedata)){
-                        imageView.setVisibility(View.GONE);
-                    }
-                    else{
-                        byte data[] = Base64.decode(imagedata, Base64.DEFAULT);
-//                    Log.d("image",data.toString());
-                        Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
-                        imageView.setImageBitmap(bitmap);
-                        Log.d("imagenotnull",data.toString());
-
-                    }
+                            if("".equals(imagedata)){
+                                imageView.setVisibility(View.GONE);
+                            }
+                            else{
+                                byte data[] = Base64.decode(imagedata, Base64.DEFAULT);
+                                Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+                                imageView.setImageBitmap(bitmap);
+                            }
 
 
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                Button addCommentButton = (Button) post.findViewById(R.id.addcommentbutton);
-                try {
-                    addCommentButton.setTag(allPosts.getJSONObject(i).getString("postid"));
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        Button addCommentButton = (Button) post.findViewById(R.id.addcommentbutton);
+                        try {
+                            addCommentButton.setTag(allPosts.getJSONObject(i).getString("postid"));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
 
-                addCommentButton.setOnClickListener(new View.OnClickListener() {
-
-
-                    @Override
-                    public void onClick(View view) {
-                        Intent intent = new Intent(getApplicationContext(), addComment.class);
-                        intent.putExtra("id",view.getTag().toString());
-                        startActivity(intent);
-                    }
-                });
-
-                JSONArray comments = new JSONArray();
-
-                try {
-                    comments = allPosts.getJSONObject(i).getJSONArray("Comment");
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-                for(int j=0;j<comments.length() && j< 3 ;j++){
-                    LinearLayout commentLayout = (LinearLayout) post.findViewById(R.id.commentlayout);
-                    View comment = getLayoutInflater().inflate(R.layout.comment, null);
-
-                    TextView cuserIdView = (TextView) comment.findViewById(R.id.commentuserid);
-                    TextView ctimeView = (TextView) comment.findViewById(R.id.commenttime);
-                    TextView cposttextView = (TextView) comment.findViewById(R.id.commenttext);
-
-                    try {
-                        String userId = comments.getJSONObject(j).getString("uid");
-                        cuserIdView.setText(userId);
-                        String time = comments.getJSONObject(j).getString("timestamp");
-                        ctimeView.setText(time);
-                        String posttext = comments.getJSONObject(j).getString("text");
-                        cposttextView.setText(posttext);
+                        addCommentButton.setOnClickListener(new View.OnClickListener() {
 
 
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    commentLayout.addView(comment);
-                }
-                if(comments.length()<=3){
+                            @Override
+                            public void onClick(View view) {
+                                Intent intent = new Intent(getApplicationContext(), addComment.class);
+                                intent.putExtra("id",view.getTag().toString());
+                                startActivity(intent);
+                            }
+                        });
 
-                }
-                else{
+                        JSONArray comments = new JSONArray();
 
-                    final TextView moreLink = (TextView) post.findViewById(R.id.morelink);
-                    moreLink.setVisibility(View.VISIBLE);
-                    moreLink.setTag(i);
+                        try {
+                            comments = allPosts.getJSONObject(i).getJSONArray("Comment");
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
 
-                    moreLink.setOnClickListener(new View.OnClickListener() {
+                        for(int j=0;j<comments.length() && j< 3 ;j++){
+                            LinearLayout commentLayout = (LinearLayout) post.findViewById(R.id.commentlayout);
+                            View comment = getLayoutInflater().inflate(R.layout.comment, null);
 
-                        @Override
-                        public void onClick(View view) {
-                            View post = (View) view.getParent();
-                            int postposition = Integer.parseInt(view.getTag().toString());
-                            JSONArray comments = new JSONArray();
+                            TextView cuserIdView = (TextView) comment.findViewById(R.id.commentuserid);
+                            TextView ctimeView = (TextView) comment.findViewById(R.id.commenttime);
+                            TextView cposttextView = (TextView) comment.findViewById(R.id.commenttext);
 
                             try {
-                                comments = allPosts.getJSONObject(postposition).getJSONArray("Comment");
+                                String userId = comments.getJSONObject(j).getString("uid");
+                                cuserIdView.setText(userId);
+                                String time = comments.getJSONObject(j).getString("timestamp");
+                                ctimeView.setText(time);
+                                String posttext = comments.getJSONObject(j).getString("text");
+                                cposttextView.setText(posttext);
+
+
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
-
-                            for(int j=3;j<comments.length() ;j++){
-                                LinearLayout commentLayout = (LinearLayout) post.findViewById(R.id.commentlayout);
-                                View comment = getLayoutInflater().inflate(R.layout.comment, null);
-
-                                TextView cuserIdView = (TextView) comment.findViewById(R.id.commentuserid);
-                                TextView ctimeView = (TextView) comment.findViewById(R.id.commenttime);
-                                TextView cposttextView = (TextView) comment.findViewById(R.id.commenttext);
-
-                                try {
-                                    String userId = comments.getJSONObject(j).getString("uid");
-                                    cuserIdView.setText(userId);
-                                    String time = comments.getJSONObject(j).getString("timestamp");
-                                    ctimeView.setText(time);
-                                    String posttext = comments.getJSONObject(j).getString("text");
-                                    cposttextView.setText(posttext);
-
-
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
-                                commentLayout.addView(comment);
-                            }
-                            moreLink.setVisibility(View.GONE);
+                            commentLayout.addView(comment);
                         }
-                    });
+                        if(comments.length()<=3){
+
+                        }
+                        else{
+
+                            final TextView moreLink = (TextView) post.findViewById(R.id.morelink);
+                            moreLink.setVisibility(View.VISIBLE);
+                            moreLink.setTag(i);
+
+                            moreLink.setOnClickListener(new View.OnClickListener() {
+
+                                @Override
+                                public void onClick(View view) {
+                                    View post = (View) view.getParent();
+                                    int postposition = Integer.parseInt(view.getTag().toString());
+                                    JSONArray comments = new JSONArray();
+
+                                    try {
+                                        comments = allPosts.getJSONObject(postposition).getJSONArray("Comment");
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+
+                                    for(int j=3;j<comments.length() ;j++){
+                                        LinearLayout commentLayout = (LinearLayout) post.findViewById(R.id.commentlayout);
+                                        View comment = getLayoutInflater().inflate(R.layout.comment, null);
+
+                                        TextView cuserIdView = (TextView) comment.findViewById(R.id.commentuserid);
+                                        TextView ctimeView = (TextView) comment.findViewById(R.id.commenttime);
+                                        TextView cposttextView = (TextView) comment.findViewById(R.id.commenttext);
+
+                                        try {
+                                            String userId = comments.getJSONObject(j).getString("uid");
+                                            cuserIdView.setText(userId);
+                                            String time = comments.getJSONObject(j).getString("timestamp");
+                                            ctimeView.setText(time);
+                                            String posttext = comments.getJSONObject(j).getString("text");
+                                            cposttextView.setText(posttext);
+
+
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+                                        commentLayout.addView(comment);
+                                    }
+                                    moreLink.setVisibility(View.GONE);
+                                }
+                            });
+                        }
+                        home.addView(post);
+                    }
                 }
-                home.addView(post);
+                else if("Invalid session".equals(success.getString("message"))){
+                    Intent i = new Intent(getApplicationContext(), LoginActivity.class);
+                    startActivity(i);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
+
         }
     }
 

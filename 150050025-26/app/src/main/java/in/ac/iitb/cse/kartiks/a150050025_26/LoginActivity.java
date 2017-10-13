@@ -363,17 +363,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 byte[] postData = param.getBytes( StandardCharsets.UTF_8 );
                 urlConnection.setRequestProperty( "Content-Length", Integer.toString( postData.length));
 
-//                    Log.d("id", mEmail);
-//                    Log.d("password", mPassword);
                 DataOutputStream wr = new DataOutputStream( urlConnection.getOutputStream());
                 wr.write( postData );
 
                 int responseCode = urlConnection.getResponseCode();
-//                    Log.d("response",String.valueOf(responseCode));
                 result = Helper.IstreamToString(urlConnection.getInputStream());
                 JSONObject jsonObj = new JSONObject(result);
                 if(jsonObj.getBoolean("status")) {
-                    Log.d("status","true");
                     return true;
                 }
                 wr.flush();
@@ -397,7 +393,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         protected void onPostExecute(final Boolean success) {
             mAuthTask = null;
             showProgress(false);
-            Log.d("after",String.valueOf(success));
             if (success) {
                 Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
                 intent.putExtra("id",mEmail);

@@ -1,5 +1,6 @@
 package in.ac.iitb.cse.kartiks.a150050025_26;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -26,7 +27,6 @@ public class addComment extends BaseActivity {
         setContentView(R.layout.activity_add_comment);
         Bundle bundle = getIntent().getExtras();
         final String id = bundle.getString("id");
-        Log.d("postid",id);
 
         Button acButton = (Button) findViewById(R.id.commentbutton);
         acButton.setOnClickListener(new View.OnClickListener() {
@@ -39,7 +39,7 @@ public class addComment extends BaseActivity {
         });
     }
 
-    public class AddCommentTask extends AsyncTask<Void, Void, Boolean> {
+    public class AddCommentTask extends AsyncTask<Void, Void, JSONObject> {
 
         private final String postid;
         private final String comment;
@@ -50,7 +50,7 @@ public class addComment extends BaseActivity {
         }
 
         @Override
-        protected Boolean doInBackground(Void... params) {
+        protected JSONObject doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
             String http = Helper.url + "NewComment";
             String result = "";
@@ -78,35 +78,38 @@ public class addComment extends BaseActivity {
 
                 int responseCode = urlConnection.getResponseCode();
                 result = Helper.IstreamToString(urlConnection.getInputStream());
-                Log.d("response",result);
                 JSONObject jsonObj = new JSONObject(result);
-                Log.d("response",jsonObj.toString());
-                if(jsonObj.getBoolean("status")) {
-                    Log.d("status","true");
-                    return true;
-                }
                 wr.flush();
                 wr.close();
+                return jsonObj;
             }
             catch (IOException e) {
                 System.out.println(result);
                 e.printStackTrace();
-                return false;
+                return null;
             } catch (JSONException e) {
                 e.printStackTrace();
-                return false;
+                return null;
             } finally {
                 if (urlConnection != null)
                     urlConnection.disconnect();
             }
-            return false;
+
         }
 
         @Override
-        protected void onPostExecute(final Boolean success) {
-            Log.d("json",success.toString());
-            if(success){
-                addComment.this.finish();
+        protected void onPostExecute(final JSONObject success) {
+
+            try {
+                if(success.getBoolean("status")){
+                    addComment.this.finish();
+                }
+                else if("Invalid session".equals(success.getString("message"))){
+                    Intent i = new Intent(getApplicationContext(), LoginActivity.class);
+                    startActivity(i);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
         }
     }

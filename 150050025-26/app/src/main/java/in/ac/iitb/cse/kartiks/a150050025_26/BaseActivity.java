@@ -35,7 +35,6 @@ public class BaseActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         Intent intent;
         String classname = this.getClass().getName();
-        Log.d("classname", classname);
         switch (item.getItemId()) {
             case R.id.action_logout:
                 LogoutTask loutTask = new LogoutTask();
@@ -43,16 +42,13 @@ public class BaseActivity extends AppCompatActivity {
                 break;
             case R.id.action_viewPost:
                 if("in.ac.iitb.cse.kartiks.a150050025_26.HomeActivity".equals(classname)) {
-                    Log.d("classname", "yes");
                     break;
                 }
-                Log.d("classname", "no");
                 intent = new Intent(this, HomeActivity.class);
                 this.startActivity(intent);
                 break;
             case R.id.action_addPost:
                 if("in.ac.iitb.cse.kartiks.a150050025_26.addPost".equals(classname)) {
-                    Log.d("classname", "yes");
                     break;
                 }
                 intent = new Intent(this, addPost.class);
@@ -60,7 +56,6 @@ public class BaseActivity extends AppCompatActivity {
                 break;
             case R.id.action_search:
                 if("in.ac.iitb.cse.kartiks.a150050025_26.SearchActivity".equals(classname)) {
-                    Log.d("classname", "yes");
                     break;
                 }
                 intent = new Intent(this, SearchActivity.class);
@@ -72,16 +67,16 @@ public class BaseActivity extends AppCompatActivity {
         return true;
     }
 
-    public class LogoutTask extends AsyncTask<Void, Void, Boolean> {
+    public class LogoutTask extends AsyncTask<Void, Void, JSONObject> {
 
         LogoutTask() {
 
         }
 
         @Override
-        protected Boolean doInBackground(Void... params) {
+        protected JSONObject doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
-            String http = "http://192.168.0.109:8080/Android/Logout";
+            String http = Helper.url+"Logout";
             String result = "";
 
             HttpURLConnection urlConnection=null;
@@ -95,32 +90,37 @@ public class BaseActivity extends AppCompatActivity {
                 urlConnection.setUseCaches(false);
                 int responseCode = urlConnection.getResponseCode();
                 result = Helper.IstreamToString(urlConnection.getInputStream());
-                Log.d("response",result);
                 JSONObject jsonObj = new JSONObject(result);
-                Log.d("response",jsonObj.toString());
-                if(jsonObj.getBoolean("status")) {
-                    Log.d("status","true");
-                    return true;
-                }
+
+                return jsonObj;
             }
             catch (IOException e) {
                 System.out.println(result);
                 e.printStackTrace();
-                return false;
+                return null;
             } catch (JSONException e) {
                 e.printStackTrace();
-                return false;
+                return null;
             } finally {
                 if (urlConnection != null)
                     urlConnection.disconnect();
             }
-            return false;
         }
 
         @Override
-        protected void onPostExecute(final Boolean success) {
-            Intent i = new Intent(getApplicationContext(), LoginActivity.class);
-            startActivity(i);
+        protected void onPostExecute(final JSONObject success) {
+            try {
+                if(success.getBoolean("status")){
+                    Intent i = new Intent(getApplicationContext(), LoginActivity.class);
+                    startActivity(i);
+                }
+                else if("Invalid session".equals(success.getString("message"))){
+                    Intent i = new Intent(getApplicationContext(), LoginActivity.class);
+                    startActivity(i);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

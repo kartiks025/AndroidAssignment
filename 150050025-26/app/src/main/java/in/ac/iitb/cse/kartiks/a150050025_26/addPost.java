@@ -143,7 +143,7 @@ public class addPost extends BaseActivity {
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, STORAGE_PERMISSION_CODE);
     }
 
-    public class AddPostTask extends AsyncTask<Void, Void, Boolean> {
+    public class AddPostTask extends AsyncTask<Void, Void, JSONObject> {
 
         private final String content;
         private final Uri path;
@@ -154,18 +154,16 @@ public class addPost extends BaseActivity {
         }
 
         @Override
-        protected Boolean doInBackground(Void... params) {
+        protected JSONObject doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
             String http = Helper.url + "CreatePost";
             String result = "";
-//            Log.d("filepath",path.toString());
             File sourceFile;
             if(path!=null)
                 sourceFile = new File(getPath(path));
             else
                 sourceFile = null;
 
-//            Log.d("dsds",String.valueOf(sourceFile.isFile()));
 
             HttpURLConnection urlConnection=null;
             try {
@@ -219,39 +217,41 @@ public class addPost extends BaseActivity {
 
                 int responseCode = urlConnection.getResponseCode();
                 result = Helper.IstreamToString(urlConnection.getInputStream());
-                Log.d("response",result);
                 JSONObject jsonObj = new JSONObject(result);
-                Log.d("response",jsonObj.toString());
-                if(jsonObj.getBoolean("status")) {
-                    Log.d("status","true");
-                    return true;
-                }
 
                 wr.flush();
                 wr.close();
+
+                return jsonObj;
             }
             catch (IOException e) {
                 System.out.println(result);
                 e.printStackTrace();
-                return false;
+                return null;
             } catch (JSONException e) {
                 e.printStackTrace();
-                return false;
+                return null;
             } finally {
                 if (urlConnection != null)
                     urlConnection.disconnect();
             }
-            return false;
         }
 
         @Override
-        protected void onPostExecute(final Boolean success) {
-            Log.d("json",success.toString());
-            if(success){
-                EditText edit = (EditText)addPost.this.findViewById(R.id.postText);
-                edit.setText("");
-                Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
-                startActivity(intent);
+        protected void onPostExecute(final JSONObject success) {
+            try {
+                if(success.getBoolean("status")){
+                    EditText edit = (EditText)addPost.this.findViewById(R.id.postText);
+                    edit.setText("");
+                    Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
+                    startActivity(intent);
+                }
+                else if("Invalid session".equals(success.getString("message"))){
+                    Intent i = new Intent(getApplicationContext(), LoginActivity.class);
+                    startActivity(i);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
 
         }

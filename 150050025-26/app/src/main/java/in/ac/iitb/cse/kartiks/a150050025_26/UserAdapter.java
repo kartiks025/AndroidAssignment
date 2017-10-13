@@ -66,7 +66,6 @@ public class UserAdapter extends BaseAdapter {
         TextView userIdView = (TextView) itemView.findViewById(R.id.userid);
         TextView userNameView = (TextView) itemView.findViewById(R.id.username);
         TextView userEmailView = (TextView) itemView.findViewById(R.id.useremail);
-        Log.d("adapter",allUsers.toString());
         try {
             String userId = allUsers.getJSONObject(position).getString("uid");
             userIdView.setText(userId);

@@ -81,7 +81,6 @@ public class SearchActivity extends BaseActivity {
                 ((SearchView) findViewById(R.id.simpleSearchView)).setIconified(true);
 //                ((SearchView) findViewById(R.id.simpleSearchView)).setQuery("",false);
                 JSONObject selected = (JSONObject) parent.getItemAtPosition(position);
-                Log.d("selected",selected.toString());
                 try {
                     userid[0] = selected.getString("uid");
                     name[0] = selected.getString("name");
@@ -144,7 +143,7 @@ public class SearchActivity extends BaseActivity {
         });
     }
 
-    public class ShowUsersTask extends AsyncTask<Void, Void, JSONArray> {
+    public class ShowUsersTask extends AsyncTask<Void, Void, JSONObject> {
 
         private final String search;
         private final UserAdapter adapter;
@@ -155,7 +154,7 @@ public class SearchActivity extends BaseActivity {
         }
 
         @Override
-        protected JSONArray doInBackground(Void... params) {
+        protected JSONObject doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
             String http = Helper.url+"SearchUser";
             String result = "";
@@ -182,18 +181,12 @@ public class SearchActivity extends BaseActivity {
                 wr.write( postData );
 
                 int responseCode = urlConnection.getResponseCode();
-                    Log.d("response",String.valueOf(responseCode));
                 result = Helper.IstreamToString(urlConnection.getInputStream());
-                Log.d("response",result);
                 JSONObject jsonObj = new JSONObject(result);
-                Log.d("response",jsonObj.toString());
-                if(jsonObj.getBoolean("status")) {
-                    Log.d("status","true");
-                    JSONArray data = jsonObj.getJSONArray("data");
-                    return data;
-                }
+
                 wr.flush();
                 wr.close();
+                return jsonObj;
             }
             catch (IOException e) {
                 System.out.println(result);
@@ -206,17 +199,26 @@ public class SearchActivity extends BaseActivity {
                 if (urlConnection != null)
                     urlConnection.disconnect();
             }
-            return null;
         }
 
         @Override
-        protected void onPostExecute(final JSONArray success) {
-            Log.d("json", success.toString());
-            adapter.upDateEntries(success);
+        protected void onPostExecute(final JSONObject success) {
+
+            try {
+                if(success.getBoolean("status")){
+                    adapter.upDateEntries(success.getJSONArray("data"));
+                }
+                else if("Invalid session".equals(success.getString("message"))){
+                    Intent i = new Intent(getApplicationContext(), LoginActivity.class);
+                    startActivity(i);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
     }
 
-    public class FollowTask extends AsyncTask<Void, Void, Boolean> {
+    public class FollowTask extends AsyncTask<Void, Void, JSONObject> {
 
         private final String uid;
 
@@ -225,7 +227,7 @@ public class SearchActivity extends BaseActivity {
         }
 
         @Override
-        protected Boolean doInBackground(Void... params) {
+        protected JSONObject doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
             String http = Helper.url+"Follow";
             String result = "";
@@ -252,41 +254,44 @@ public class SearchActivity extends BaseActivity {
                 wr.write( postData );
 
                 int responseCode = urlConnection.getResponseCode();
-                Log.d("response",String.valueOf(responseCode));
                 result = Helper.IstreamToString(urlConnection.getInputStream());
-                Log.d("response",result);
                 JSONObject jsonObj = new JSONObject(result);
-                Log.d("response",jsonObj.toString());
-                if(jsonObj.getBoolean("status")) {
-                    Log.d("status","true");
-                    return true;
-                }
+
                 wr.flush();
                 wr.close();
+                return jsonObj;
             }
             catch (IOException e) {
                 System.out.println(result);
                 e.printStackTrace();
-                return false;
+                return null;
             } catch (JSONException e) {
                 e.printStackTrace();
-                return false;
+                return null;
             } finally {
                 if (urlConnection != null)
                     urlConnection.disconnect();
             }
-            return false;
         }
 
         @Override
-        protected void onPostExecute(final Boolean success) {
-            Log.d("json", success.toString());
-            AllFollowersTask afTask = new AllFollowersTask();
-            afTask.execute((Void) null);
+        protected void onPostExecute(final JSONObject success) {
+            try {
+                if(success.getBoolean("status")){
+                    AllFollowersTask afTask = new AllFollowersTask();
+                    afTask.execute((Void) null);
+                }
+                else if("Invalid session".equals(success.getString("message"))){
+                    Intent i = new Intent(getApplicationContext(), LoginActivity.class);
+                    startActivity(i);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
     }
 
-    public class UnfollowTask extends AsyncTask<Void, Void, Boolean> {
+    public class UnfollowTask extends AsyncTask<Void, Void, JSONObject> {
 
         private final String uid;
 
@@ -295,7 +300,7 @@ public class SearchActivity extends BaseActivity {
         }
 
         @Override
-        protected Boolean doInBackground(Void... params) {
+        protected JSONObject doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
             String http = Helper.url+"Unfollow";
             String result = "";
@@ -322,48 +327,50 @@ public class SearchActivity extends BaseActivity {
                 wr.write( postData );
 
                 int responseCode = urlConnection.getResponseCode();
-                Log.d("response",String.valueOf(responseCode));
                 result = Helper.IstreamToString(urlConnection.getInputStream());
-                Log.d("response",result);
                 JSONObject jsonObj = new JSONObject(result);
-                Log.d("response",jsonObj.toString());
-                if(jsonObj.getBoolean("status")) {
-                    Log.d("status","true");
-                    return true;
-                }
                 wr.flush();
                 wr.close();
+                return jsonObj;
             }
             catch (IOException e) {
                 System.out.println(result);
                 e.printStackTrace();
-                return false;
+                return null;
             } catch (JSONException e) {
                 e.printStackTrace();
-                return false;
+                return null;
             } finally {
                 if (urlConnection != null)
                     urlConnection.disconnect();
             }
-            return false;
         }
 
         @Override
-        protected void onPostExecute(final Boolean success) {
-            Log.d("json", success.toString());
-            AllFollowersTask afTask = new AllFollowersTask();
-            afTask.execute((Void) null);
+        protected void onPostExecute(final JSONObject success) {
+            try {
+                if(success.getBoolean("status")){
+                    AllFollowersTask afTask = new AllFollowersTask();
+                    afTask.execute((Void) null);
+                }
+                else if("Invalid session".equals(success.getString("message"))){
+                    Intent i = new Intent(getApplicationContext(), LoginActivity.class);
+                    startActivity(i);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
     }
 
-    public class AllFollowersTask extends AsyncTask<Void, Void, JSONArray> {
+    public class AllFollowersTask extends AsyncTask<Void, Void, JSONObject> {
 
 
         AllFollowersTask( ) {
         }
 
         @Override
-        protected JSONArray doInBackground(Void... params) {
+        protected JSONObject doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
             String http = Helper.url+"UserFollow";
             String result = "";
@@ -382,16 +389,10 @@ public class SearchActivity extends BaseActivity {
 
 
                 int responseCode = urlConnection.getResponseCode();
-                Log.d("response",String.valueOf(responseCode));
                 result = Helper.IstreamToString(urlConnection.getInputStream());
-                Log.d("response",result);
                 JSONObject jsonObj = new JSONObject(result);
-                Log.d("response",jsonObj.toString());
-                if(jsonObj.getBoolean("status")) {
-                    Log.d("status","true");
-                    JSONArray data = jsonObj.getJSONArray("data");
-                    return data;
-                }
+
+                return jsonObj;
 
             }
             catch (IOException e) {
@@ -405,25 +406,35 @@ public class SearchActivity extends BaseActivity {
                 if (urlConnection != null)
                     urlConnection.disconnect();
             }
-            return null;
         }
 
         @Override
-        protected void onPostExecute(final JSONArray success) {
-            followedusers = new ArrayList<String>();
-            Log.d("json", success.toString());
-            for(int i=0;i<success.length();i++){
-                try {
-                    followedusers.add(success.getJSONObject(i).getString("uid"));
-                } catch (JSONException e) {
-                    e.printStackTrace();
+        protected void onPostExecute(final JSONObject success) {
+
+            try {
+                if(success.getBoolean("status")){
+                    followedusers = new ArrayList<String>();
+                    for(int i=0;i<success.getJSONArray("data").length();i++){
+                        try {
+                            followedusers.add(success.getJSONArray("data").getJSONObject(i).getString("uid"));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    if(followedusers.contains(userid[0]))
+                        ((Button) findViewById(R.id.follow)).setText("Unfollow");
+                    else
+                        ((Button) findViewById(R.id.follow)).setText("Follow");
                 }
+                else if("Invalid session".equals(success.getString("message"))){
+                    Intent i = new Intent(getApplicationContext(), LoginActivity.class);
+                    startActivity(i);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
-            Log.d("followed",followedusers.toString());
-            if(followedusers.contains(userid[0]))
-                ((Button) findViewById(R.id.follow)).setText("Unfollow");
-            else
-                ((Button) findViewById(R.id.follow)).setText("Follow");
+
+
         }
     }
 
